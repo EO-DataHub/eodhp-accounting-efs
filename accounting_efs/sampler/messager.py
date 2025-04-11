@@ -25,7 +25,7 @@ class EFSSamplerMessager(Messager[Iterable[str], BillingResourceConsumptionRateS
             size = self.count_size(sample_request.path)
 
             if size is None:
-                actions.append(Messager.FailureAction(permanent=True))
+                yield Messager.FailureAction(permanent=True)
             else:
                 sample_msg = BillingResourceConsumptionRateSample(
                     uuid=str(uuid.uuid4()),
@@ -36,7 +36,7 @@ class EFSSamplerMessager(Messager[Iterable[str], BillingResourceConsumptionRateS
                     rate=size,
                 )
 
-                actions.append(Messager.PulsarMessageAction(payload=sample_msg))
+                yield Messager.PulsarMessageAction(payload=sample_msg)
 
         return actions
 
@@ -46,7 +46,7 @@ class EFSSamplerMessager(Messager[Iterable[str], BillingResourceConsumptionRateS
         # from `du` being written in C and being very mature outweighing the cost of running
         # a process.
         du_result = subprocess.run(
-            ["du", "--apparent-size", "-b", "-P", "-s", str(path)],
+            ["du", "--block-size", "1", "-P", "-s", str(path)],
             capture_output=True,
             text=True,
             timeout=1800,

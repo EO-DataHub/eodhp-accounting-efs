@@ -15,7 +15,7 @@ def sampler_messager():
 
 def test_no_workspaces_produces_no_messages(sampler_messager):
     actions = sampler_messager.process_msg([])
-    assert actions == []
+    assert list(actions) == []
 
 
 def test_consume_no_workspaces_produces_no_failures(sampler_messager):
