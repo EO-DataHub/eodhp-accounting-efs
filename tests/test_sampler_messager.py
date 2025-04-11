@@ -26,6 +26,8 @@ def test_consume_no_workspaces_produces_no_failures(sampler_messager):
 
 
 def test_workspace_sample_produces_correct_message(test_dir, sampler_messager):
+    # This is a parameterized fixture so this test will run with a variety of different sizes
+    # and cases.
     test_dir_path, test_dir_size = test_dir
 
     actions = list(sampler_messager.process_msg([SampleRequestMsg("workspace0", test_dir_path)]))

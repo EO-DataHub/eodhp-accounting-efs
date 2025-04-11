@@ -73,7 +73,7 @@ import pytest
         },
     ]
 )
-def test_dir(request):
+def test_dir(request, block_size):
     """
     Simulates a directory containing workspaces block stores. Depending on the settings, each
     workspace will contain:
@@ -92,12 +92,6 @@ def test_dir(request):
 
     with TemporaryDirectory() as tmpdir_str:
         tmpdir = Path(tmpdir_str)
-
-        # The space used by a directory will vary by underlying FS.
-        # It also varies by number of entries but we don't add many.
-        block_size = int(
-            subprocess.run(["stat", "-fc", "%s", tmpdir_str], capture_output=True).stdout
-        )
 
         def round_up(size):
             return size + (block_size - (size % block_size))
@@ -160,3 +154,10 @@ def test_dir(request):
             os.symlink(tmpdir / "500-byte-file", tmpdir / "symlink-to-500-byte-file")
 
         yield (tmpdir, expected_size)
+
+
+@pytest.fixture
+def block_size():
+    # The space used by a file will vary by underlying FS.
+    # It also varies by number of entries but we don't add many.
+    return int(subprocess.run(["stat", "-fc", "%s", "."], capture_output=True).stdout)

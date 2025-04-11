@@ -16,7 +16,9 @@ class SampleRequestMsg:
     path: Path
 
 
-class EFSSamplerMessager(Messager[Iterable[str], BillingResourceConsumptionRateSample]):
+class EFSSamplerMessager(
+    Messager[Iterable[SampleRequestMsg], BillingResourceConsumptionRateSample]
+):
     def process_msg(self, msg: Iterable[SampleRequestMsg]) -> Iterable[Messager.Action]:
         actions = []
 
