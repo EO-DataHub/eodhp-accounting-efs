@@ -27,7 +27,7 @@ def generate_sample_requests(parent: Path):
 @click.argument("dir")
 def cli(dir: str, verbose: int = 1, interval: int = 3600, pulsar_url=None, once=False):
     setup_logging(verbosity=verbose)
-    log_component_version("efs-sampler")
+    log_component_version("eodhp-accounting-efs")
 
     logging.info("Monitoring %s with target interval %i seconds")
 
