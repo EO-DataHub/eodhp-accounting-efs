@@ -8,9 +8,9 @@ attrs==25.3.0
     # via
     #   jsonschema
     #   referencing
-boto3==1.37.31
+boto3==1.37.33
     # via eodhp-utils
-botocore==1.37.31
+botocore==1.37.33
     # via
     #   boto3
     #   eodhp-utils
@@ -23,7 +23,7 @@ deprecated==1.2.18
     # via
     #   opentelemetry-api
     #   opentelemetry-semantic-conventions
-eodhp-utils @ git+https://github.com/UKEODHP/eodhp-utils@v0.1.7
+eodhp-utils @ git+https://github.com/UKEODHP/eodhp-utils@EODHP-906-consumption-rate-messages
     # via eodhp-accounting-efs (pyproject.toml)
 faker==37.1.0
     # via eodhp-utils
@@ -85,7 +85,7 @@ typing-extensions==4.13.2
     # via opentelemetry-sdk
 tzdata==2025.2
     # via faker
-urllib3==2.3.0
+urllib3==2.4.0
     # via botocore
 wrapt==1.17.2
     # via
