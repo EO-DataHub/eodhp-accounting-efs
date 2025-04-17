@@ -44,8 +44,8 @@ def test_main_scans_dirs(block_size):
 
         assert be0.sku == "EFS-STORAGE-STD"
         assert be0.workspace == "workspace0"
-        assert be0.rate == block_size
+        assert be0.rate == block_size / (1024.0**3)
 
         assert be1.sku == "EFS-STORAGE-STD"
         assert be1.workspace == "workspace1"
-        assert be1.rate == block_size * 2
+        assert be1.rate == block_size * 2 / (1024.0**3)

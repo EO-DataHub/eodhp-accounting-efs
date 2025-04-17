@@ -153,7 +153,7 @@ def test_dir(request, block_size):
         if request.param["with_symlink"]:
             os.symlink(tmpdir / "500-byte-file", tmpdir / "symlink-to-500-byte-file")
 
-        yield (tmpdir, expected_size)
+        yield (tmpdir, expected_size / (1024.0**3))
 
 
 @pytest.fixture
