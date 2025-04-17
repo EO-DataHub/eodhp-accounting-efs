@@ -62,8 +62,8 @@ class EFSSamplerMessager(
         # Anything else will be an error reported by du.
         try:
             size_str = du_result.stdout.split("\t")[0]
-            size = int(size_str)
-            logging.debug("Size of %s was %i", str(path), size)
+            size = float(size_str) / (1024**3)
+            logging.debug("Size of %s was %i GB", str(path), size)
             return size
         except (ValueError, IndexError):
             logging.exception(
