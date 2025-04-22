@@ -1,4 +1,5 @@
 import logging
+import os
 import time
 from pathlib import Path
 
@@ -37,9 +38,10 @@ def cli(dir: str, verbose: int = 1, interval: int = 3600, pulsar_url=None, once=
 def main(dir: str, verbose: int = 1, interval: int = 3600, pulsar_url=None, once=False):
     pulsar_client = get_pulsar_client(pulsar_url=pulsar_url)
 
+    pod_name = os.getenv("K8S_POD_NAME", "unknown")
     producer = pulsar_client.create_producer(
         topic="billing-events-consumption-rate-samples",
-        producer_name=f"efs-monitor-{dir}",
+        producer_name=f"efs-monitor-{dir}-{pod_name}",
         schema=generate_billingresourceconsumptionratesample_schema(),
     )
 
