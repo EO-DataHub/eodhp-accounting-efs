@@ -20,8 +20,6 @@ class EFSSamplerMessager(
     Messager[Iterable[SampleRequestMsg], BillingResourceConsumptionRateSample]
 ):
     def process_msg(self, msg: Iterable[SampleRequestMsg]) -> Iterable[Messager.Action]:
-        actions = []
-
         for sample_request in msg:
             start_time = datetime.now(timezone.utc)
             size = self.count_size(sample_request.path)
@@ -39,8 +37,6 @@ class EFSSamplerMessager(
                 )
 
                 yield Messager.PulsarMessageAction(payload=sample_msg)
-
-        return actions
 
     @classmethod
     def count_size(cls, path: Path) -> Optional[int]:
@@ -63,7 +59,7 @@ class EFSSamplerMessager(
         try:
             size_str = du_result.stdout.split("\t")[0]
             size = float(size_str) / (1024**3)
-            logging.debug("Size of %s was %i GB", str(path), size)
+            logging.debug("Size of %s was %f GB", str(path), size)
             return size
         except (ValueError, IndexError):
             logging.exception(

@@ -30,7 +30,7 @@ def cli(dir: str, verbose: int = 1, interval: int = 3600, pulsar_url=None, once=
     setup_logging(verbosity=verbose)
     log_component_version("eodhp-accounting-efs")
 
-    logging.info("Monitoring %s with target interval %i seconds")
+    logging.info("Monitoring %s with target interval %i seconds", dir, interval)
 
     main(dir, verbose, interval, pulsar_url, once)
 

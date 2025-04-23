@@ -15,7 +15,7 @@
 [project]
 name = "eodhp-accounting-efs"
 dynamic = ["version"]
-description = "CHANGEME a short description"
+description = "Accounting data collector for workspace block store use"
 readme = "README.md"
 
 # Our target version is Python 3.13, but it may work with earlier versions.
