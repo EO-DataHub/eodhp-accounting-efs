@@ -7,7 +7,7 @@ from eodhp_utils.pulsar.messages import BillingResourceConsumptionRateSample
 from accounting_efs.sampler.__main__ import main
 
 
-def test_main_scans_dirs(block_size):
+def test_main_scans_dirs(block_size: int) -> None:
     with (
         mock.patch("accounting_efs.sampler.__main__.get_pulsar_client") as mock_getclient,
         TemporaryDirectory() as tmpdir_str,
@@ -28,9 +28,7 @@ def test_main_scans_dirs(block_size):
         ############## Check results
         calls = (
             mock_getclient()
-            .create_producer(
-                topic="billing-events-consumption-rate-samples", producer_name=any, schema=any
-            )
+            .create_producer(topic="billing-events-consumption-rate-samples", producer_name=any, schema=any)
             .send.call_args_list
         )
 
