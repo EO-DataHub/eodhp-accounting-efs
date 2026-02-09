@@ -1,10 +1,11 @@
 import logging
 import subprocess
 import uuid
+from collections.abc import Iterable
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Iterable, Optional
+from typing import Any
 
 from eodhp_utils.messagers import Messager
 from eodhp_utils.pulsar.messages import BillingResourceConsumptionRateSample
@@ -16,12 +17,10 @@ class SampleRequestMsg:
     path: Path
 
 
-class EFSSamplerMessager(
-    Messager[Iterable[SampleRequestMsg], BillingResourceConsumptionRateSample]
-):
+class EFSSamplerMessager(Messager[Iterable[SampleRequestMsg], BillingResourceConsumptionRateSample]):
     def process_msg(self, msg: Iterable[SampleRequestMsg]) -> Iterable[Messager.Action]:
         for sample_request in msg:
-            start_time = datetime.now(timezone.utc)
+            start_time = datetime.now(UTC)
             size = self.count_size(sample_request.path)
 
             if size is None:
@@ -36,10 +35,10 @@ class EFSSamplerMessager(
                     rate=size,
                 )
 
-                yield Messager.PulsarMessageAction(payload=sample_msg)
+                yield Messager.PulsarMessageAction(payload=sample_msg)  # pyright: ignore[reportArgumentType]
 
     @classmethod
-    def count_size(cls, path: Path) -> Optional[int]:
+    def count_size(cls, path: Path) -> float | None:
         # This uses `du` because we expect there to be a lot of files, with the efficiency fain
         # from `du` being written in C and being very mature outweighing the cost of running
         # a process.
@@ -62,10 +61,8 @@ class EFSSamplerMessager(
             logging.debug("Size of %s was %f GB", str(path), size)
             return size
         except (ValueError, IndexError):
-            logging.exception(
-                "Failed to calculate size of %s (output not int): %s", str(path), du_result.stdout
-            )
+            logging.exception("Failed to calculate size of %s (output not int): %s", str(path), du_result.stdout)
             return None
 
-    def gen_empty_catalogue_message(self, msg: Iterable[str]) -> dict:
+    def gen_empty_catalogue_message(self, msg: Iterable[SampleRequestMsg]) -> dict[str, Any]:
         return {}

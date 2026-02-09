@@ -1,5 +1,6 @@
 import os
 import subprocess
+from collections.abc import Generator
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
@@ -73,7 +74,7 @@ import pytest
         },
     ]
 )
-def test_dir(request, block_size):
+def test_dir(request: pytest.FixtureRequest, block_size: int) -> Generator[tuple[Path, float]]:
     """
     Simulates a directory containing workspaces block stores. Depending on the settings, each
     workspace will contain:
@@ -93,7 +94,7 @@ def test_dir(request, block_size):
     with TemporaryDirectory() as tmpdir_str:
         tmpdir = Path(tmpdir_str)
 
-        def round_up(size):
+        def round_up(size: int) -> int:
             return size + (block_size - (size % block_size))
 
         # dir_size = EFSSamplerMessager.count_size(tmpdir)
@@ -157,7 +158,7 @@ def test_dir(request, block_size):
 
 
 @pytest.fixture
-def block_size():
+def block_size() -> int:
     # The space used by a file will vary by underlying FS.
     # It also varies by number of entries but we don't add many.
     return int(subprocess.run(["stat", "-fc", "%s", "."], capture_output=True).stdout)

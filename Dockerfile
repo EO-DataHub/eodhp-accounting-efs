@@ -1,20 +1,26 @@
 # syntax=docker/dockerfile:1
-FROM python:3.13-slim-bookworm
-
-RUN rm -f /etc/apt/apt.conf.d/docker-clean; \
-    echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache
+FROM ghcr.io/astral-sh/uv:python3.13-trixie-slim
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    apt-get update -y && apt-get upgrade -y \
-    && apt-get install --yes --quiet git
+    apt-get update \
+    && apt-get install --yes --quiet --no-install-recommends git
 
-WORKDIR /accounting-efs
-ADD LICENSE requirements.txt ./
-ADD accounting_efs ./accounting_efs/
-ADD pyproject.toml ./
-RUN --mount=type=cache,target=/root/.cache/pip pip3 install -r requirements.txt .
+ENV UV_NO_DEV=1
 
-# Change as required, eg
-#  CMD ["gunicorn", "-w", "2", "-b", "0.0.0.0", "-k", "uvicorn.workers.UvicornWorker", "--log-level", "debug", "mymodule.main:app"]
-CMD ["python", "-m", "accounting_efs.sampler", "-vv"]
+WORKDIR /app
+
+# Install dependencies
+RUN --mount=type=cache,target=/root/.cache/uv \
+    --mount=type=bind,source=uv.lock,target=uv.lock \
+    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
+    uv sync --frozen --no-install-project
+
+# Copy project files
+COPY . /app
+
+# Sync the project
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen
+
+CMD ["uv", "run", "--no-sync", "python", "-m", "accounting_efs.sampler", "-vv"]

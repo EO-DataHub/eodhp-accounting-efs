@@ -1,6 +1,7 @@
 import logging
 import os
 import time
+from collections.abc import Generator
 from pathlib import Path
 
 import click
@@ -12,7 +13,7 @@ from eodhp_utils.runner import get_pulsar_client, log_component_version, setup_l
 from accounting_efs.sampler.messager import EFSSamplerMessager, SampleRequestMsg
 
 
-def generate_sample_requests(parent: Path):
+def generate_sample_requests(parent: Path) -> Generator[SampleRequestMsg]:
     assert parent.is_dir()
 
     for subdir in parent.iterdir():
@@ -26,7 +27,7 @@ def generate_sample_requests(parent: Path):
 @click.option("--interval", type=int)
 @click.option("--once", is_flag=True)
 @click.argument("dir")
-def cli(dir: str, verbose: int = 1, interval: int = 3600, pulsar_url=None, once=False):
+def cli(dir: str, verbose: int = 1, interval: int = 3600, pulsar_url: str | None = None, once: bool = False) -> None:
     setup_logging(verbosity=verbose)
     log_component_version("eodhp-accounting-efs")
 
@@ -35,14 +36,14 @@ def cli(dir: str, verbose: int = 1, interval: int = 3600, pulsar_url=None, once=
     main(dir, verbose, interval, pulsar_url, once)
 
 
-def main(dir: str, verbose: int = 1, interval: int = 3600, pulsar_url=None, once=False):
+def main(dir: str, verbose: int = 1, interval: int = 3600, pulsar_url: str | None = None, once: bool = False) -> None:
     pulsar_client = get_pulsar_client(pulsar_url=pulsar_url)
 
     pod_name = os.getenv("K8S_POD_NAME", "unknown")
     producer = pulsar_client.create_producer(
         topic="billing-events-consumption-rate-samples",
         producer_name=f"efs-monitor-{dir}-{pod_name}",
-        schema=generate_billingresourceconsumptionratesample_schema(),
+        schema=generate_billingresourceconsumptionratesample_schema(),  # pyright: ignore[reportArgumentType]
     )
 
     messager = EFSSamplerMessager(producer=producer)
