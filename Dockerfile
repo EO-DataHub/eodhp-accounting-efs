@@ -1,10 +1,10 @@
 # syntax=docker/dockerfile:1
-FROM ghcr.io/astral-sh/uv:python3.13-trixie-slim
+FROM ghcr.io/astral-sh/uv:python3.13-trixie-slim AS builder
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
     apt-get update \
-    && apt-get install --yes --quiet --no-install-recommends git
+    && apt-get install --yes --quiet --no-install-recommends git g++
 
 ENV UV_NO_DEV=1
 
@@ -22,5 +22,13 @@ COPY . /app
 # Sync the project
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen
+
+FROM ghcr.io/astral-sh/uv:python3.13-trixie-slim
+
+ENV UV_NO_DEV=1
+
+WORKDIR /app
+
+COPY --from=builder /app /app
 
 CMD ["uv", "run", "--no-sync", "python", "-m", "accounting_efs.sampler", "-vv"]
