@@ -24,7 +24,7 @@ def generate_sample_requests(parent: Path) -> Generator[SampleRequestMsg]:
 @click.command
 @click.option("-v", "--verbose", count=True)
 @click.option("--pulsar-url")
-@click.option("--interval", type=int)
+@click.option("--interval", type=int, default=3600)
 @click.option("--once", is_flag=True)
 @click.argument("dir")
 def cli(dir: str, verbose: int = 1, interval: int = 3600, pulsar_url: str | None = None, once: bool = False) -> None:
