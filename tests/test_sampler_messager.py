@@ -6,7 +6,6 @@ from pathlib import Path
 import pytest
 from eodhp_utils.messagers import Messager
 from eodhp_utils.pulsar.messages import BillingResourceConsumptionRateSample
-from pytest import MonkeyPatch
 
 from accounting_efs.sampler.messager import EFSSamplerMessager, SampleRequestMsg
 
@@ -51,7 +50,7 @@ def test_workspace_sample_produces_correct_message(
 
 
 def test_du_timeout_fails_only_that_workspace(
-    monkeypatch: MonkeyPatch, sampler_messager: EFSSamplerMessager, tmp_path: Path
+    monkeypatch: pytest.MonkeyPatch, sampler_messager: EFSSamplerMessager, tmp_path: Path
 ) -> None:
     def raise_timeout(*args: object, **kwargs: object) -> None:
         raise subprocess.TimeoutExpired(cmd="du", timeout=1800)
