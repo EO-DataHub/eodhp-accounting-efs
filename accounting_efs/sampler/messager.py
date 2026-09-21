@@ -42,12 +42,16 @@ class EFSSamplerMessager(Messager[Iterable[SampleRequestMsg], BillingResourceCon
         # This uses `du` because we expect there to be a lot of files, with the efficiency fain
         # from `du` being written in C and being very mature outweighing the cost of running
         # a process.
-        du_result = subprocess.run(
-            ["du", "--block-size", "1", "-P", "-s", str(path)],
-            capture_output=True,
-            text=True,
-            timeout=1800,
-        )
+        try:
+            du_result = subprocess.run(
+                ["du", "--block-size", "1", "-P", "-s", str(path)],
+                capture_output=True,
+                text=True,
+                timeout=1800,
+            )
+        except subprocess.TimeoutExpired:
+            logging.error("Timed out calculating size of %s", str(path))
+            return None
 
         if du_result.returncode != 0:
             logging.error("Failed to calculate size of %s: %s", str(path), du_result.stderr)
