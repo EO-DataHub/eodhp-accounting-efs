@@ -1,5 +1,4 @@
 import os
-import subprocess
 from collections.abc import Generator
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -161,4 +160,4 @@ def test_dir(request: pytest.FixtureRequest, block_size: int) -> Generator[tuple
 def block_size() -> int:
     # The space used by a file will vary by underlying FS.
     # It also varies by number of entries but we don't add many.
-    return int(subprocess.run(["stat", "-fc", "%s", "."], capture_output=True).stdout)
+    return os.statvfs(".").f_frsize
