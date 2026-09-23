@@ -12,6 +12,8 @@ from eodhp_utils.runner import get_pulsar_client, log_component_version, setup_l
 
 from accounting_efs.sampler.messager import EFSSamplerMessager, SampleRequestMsg
 
+DEFAULT_TOPIC = "billing-events-consumption-rate-samples"
+
 
 def generate_sample_requests(parent: Path) -> Generator[SampleRequestMsg]:
     assert parent.is_dir()
@@ -24,24 +26,46 @@ def generate_sample_requests(parent: Path) -> Generator[SampleRequestMsg]:
 @click.command
 @click.option("-v", "--verbose", count=True)
 @click.option("--pulsar-url")
+@click.option(
+    "--topic",
+    envvar="PULSAR_TOPIC",
+    default=DEFAULT_TOPIC,
+    show_default=True,
+    show_envvar=True,
+    help="Topic to send consumption rate samples to.",
+)
 @click.option("--interval", type=int)
 @click.option("--once", is_flag=True)
 @click.argument("dir")
-def cli(dir: str, verbose: int = 1, interval: int = 3600, pulsar_url: str | None = None, once: bool = False) -> None:
+def cli(
+    dir: str,
+    verbose: int = 1,
+    interval: int = 3600,
+    pulsar_url: str | None = None,
+    once: bool = False,
+    topic: str = DEFAULT_TOPIC,
+) -> None:
     setup_logging(verbosity=verbose)
     log_component_version("eodhp-accounting-efs")
 
-    logging.info("Monitoring %s with target interval %i seconds", dir, interval)
+    logging.info("Monitoring %s with target interval %i seconds, sending samples to %s", dir, interval, topic)
 
-    main(dir, verbose, interval, pulsar_url, once)
+    main(dir, verbose, interval, pulsar_url, once, topic)
 
 
-def main(dir: str, verbose: int = 1, interval: int = 3600, pulsar_url: str | None = None, once: bool = False) -> None:
+def main(
+    dir: str,
+    verbose: int = 1,
+    interval: int = 3600,
+    pulsar_url: str | None = None,
+    once: bool = False,
+    topic: str = DEFAULT_TOPIC,
+) -> None:
     pulsar_client = get_pulsar_client(pulsar_url=pulsar_url)
 
     pod_name = os.getenv("K8S_POD_NAME", "unknown")
     producer = pulsar_client.create_producer(
-        topic="billing-events-consumption-rate-samples",
+        topic=topic,
         producer_name=f"efs-monitor-{dir}-{pod_name}",
         schema=generate_billingresourceconsumptionratesample_schema(),  # pyright: ignore[reportArgumentType]
     )
