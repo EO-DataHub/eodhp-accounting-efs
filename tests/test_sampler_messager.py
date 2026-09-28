@@ -1,3 +1,4 @@
+import subprocess
 import uuid
 from datetime import datetime
 from pathlib import Path
@@ -46,3 +47,27 @@ def test_workspace_sample_produces_correct_message(
     assert sample.user is None
     assert sample.workspace == "workspace0"
     assert sample.rate == test_dir_size
+
+
+def test_du_timeout_fails_only_that_workspace(
+    monkeypatch: pytest.MonkeyPatch, sampler_messager: EFSSamplerMessager, tmp_path: Path
+) -> None:
+    def raise_timeout(*args: object, **kwargs: object) -> None:
+        raise subprocess.TimeoutExpired(cmd="du", timeout=1800)
+
+    monkeypatch.setattr(subprocess, "run", raise_timeout)
+
+    actions = list(
+        sampler_messager.process_msg(
+            [
+                SampleRequestMsg("slow-workspace", tmp_path),
+                SampleRequestMsg("other-workspace", tmp_path),
+            ]
+        )
+    )
+
+    assert len(actions) == 2
+    assert isinstance(actions[0], Messager.FailureAction)
+    assert actions[0].permanent
+    assert isinstance(actions[1], Messager.FailureAction)
+    assert actions[1].permanent
